@@ -394,7 +394,7 @@
 
         <br><br>
         <div class="btn-group" role="group" aria-label="Top menu">
-            <a class="btn btn-primary" href="https://arxiv.org/abs/2203.09517">Paper</a>
+            <a class="btn btn-primary" href="https://ieeexplore.ieee.org/document/10388459">Paper</a>
             <a class="btn btn-primary" href="https://github.com/callmeray/ManiSkill-ViTac2024">Code</a>
             <!--        <a class="btn btn-primary" href="https://apchenstu.github.io/TensoRF/review.pdf">Review</a>-->
             <!--        <a class="btn btn-primary" href="https://apchenstu.github.io/TensoRF/rebuttal.pdf">Rebuttal</a>-->
@@ -405,16 +405,6 @@
 
 
 <div class="container">
-    <!--    <div class="w-container">-->
-    <!--        <h2 class="grey-heading_nerf">Overview Video</h2>-->
-    <!--&lt;!&ndash;    <div class="section">&ndash;&gt;-->
-    <!--        <div class="vcontainer">-->
-    <!--            <iframe class="video" src="./TensoRF_ Tensorial Radiance Fields_files/ujOMgaKV3lA.html" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>-->
-    <!--        </div>-->
-
-    <!--    </div>-->
-
-    <!--<hr>-->
     <br><br>
     <div data-anchor="slide1" class="section nerf_section">
         <div class="grey_container w-container">
@@ -431,9 +421,21 @@
                 these methods do not exploit the characteristic of tactile signals
                 for designing the network architecture.
             </p>
-            <div class="columns-5 w-row">
-                <img src="file/head_img.png" style="width:60%; margin-right:0px; margin-top:0px;">
+
+
+            <div class="w-row">
+                <div class="w-col w-col-6">
+                    <video width="100%" controls autoplay muted loop style="margin-right:0px; margin-top:0px;">
+                        <source src="file/head.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div class="w-col w-col-6">
+                    <img src="file/result.png" style="width:100%; margin-right:0px; margin-top:0px;">
+                </div>
             </div>
+
+
             <!--            <img src="img/teaser_v6.png" alt="" class="nerf_network"/>-->
             <p class="paragraph-3 nerf_text">
                 In this article, we build a
@@ -454,25 +456,42 @@
             <h2 class="grey-heading_nerf">
                 Method
             </h2>
-            <p class="paragraph-3 nerf_text">
-                Our network focuses on two main components: tactile feature extraction and autoencoder pretraining. The feature extraction network processes both original and displaced marker positions, using shared MLPs and max-pooling to handle unordered input, outputting a low-dimensional tactile feature. For pretraining, we use an autoencoder structure where the decoder reconstructs marker positions from the encoded feature and original positions. This approach is designed to create a versatile, task-agnostic tactile feature extractor that can handle the complexities of real-world tactile data, especially during large or rapid sensor deformations in robotic applications.
-            </p>
-            <div class="columns-5 w-row">
-                <img src="file/net_arch.png" style="width:95%; margin-right:0px; margin-top:0px;">
-            </div>
+            <h3>
+                IPC simulator
+            </h3>
             <p class="paragraph-3 nerf_text">
                 We present a physics simulation method for marker-based visuotactile sensors using Incremental Potential Contact (IPC), which is based on the Finite Element Method. We show that IPC accurately simulates large deformations and dynamic properties of elastomers, employing barrier energy for contact modeling and continuous collision detection to enable stable simulation at large time steps. Our method models robot actions as Dirichlet boundary conditions on the elastomer mesh, simulating sensor deformation by calculating constrained vertex positions and velocities. We demonstrate that this approach enables accurate, efficient simulation of visuotactile sensors, facilitating the development of reinforcement learning policies for versatile manipulation tasks.
             </p>
-            <div class="w-slide">
-                <div class="div-block-9">
-                    <div class="video_class w-embed">
-                        <video width="100%" height="100%" autoplay="" muted="" controls="" loop="" preload="metadata" poster="video/poster/train_process.jpg">
-                            <source src="file/simulator.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+            <div class="w-slide" style="display: flex; justify-content: center;">
+                <div class="w-col w-col-6">
+                    <img src="file/peg-insertion-sim2real.gif" style="width:100%; margin-right:0px; margin-top:0px;">
                 </div>
             </div>
+            <h3>
+                Tactile Feature Extraction and Pretraining
+            </h3>
+            <p class="paragraph-3 nerf_text">
+                In our approach, handling real tactile sensor data is challenging due to marker tracking failures during large deformations, and the high dimensionality of marker displacements affects RL sampling efficiency. To address this, we propose an autoencoder-based tactile feature extractor built on PointNet, pretrained on simulated data to extract low-dimensional, task-agnostic features.
+
+                Tactile Feature Extraction: The network takes both original and displaced marker positions as input. A shared MLP and max-pooling handle the orderless input, producing a 512-dimensional global feature, which is further encoded into a k-dimensional tactile feature. We avoid using position differences to retain spatial information.
+
+                Autoencoder Pretraining: A decoder reconstructs marker positions from the latent features. By minimizing the L2 loss between reconstructed and actual marker positions, we ensure the extracted features capture overall information, independent of marker distribution.
+            </p>
+            <div class="columns-5 w-row">
+                <img src="file/network.png" style="width:95%; margin-right:0px; margin-top:0px;">
+            </div>
+
+            <h3>
+                RL policy network
+            </h3>
+            <p class="paragraph-3 nerf_text">
+                In the TD3 algorithm, our actor network maps the observations from the left and right tactile sensors into actions, while the critic network evaluates the Q-values of these actions using privileged ground-truth states from simulation. The feature extractor transforms the displacements of two markers into latent features, which are then processed by the MLP policy network to predict the final actions. Despite variations in tasks, the structures of both the actor and critic networks remain consistent.
+                To enhance sample efficiency and training stability, we pretrain the tactile feature extractor. During RL training, we introduce a brief self-supervised fine-tuning phase to adjust the feature extractor. This fine-tuning continues until the maximum number of updates is reached or the reconstruction loss falls below a preset threshold.
+            </p>
+            <div class="columns-5 w-row">
+                <img src="file/pretrain.jpeg" style="width:95%; margin-right:0px; margin-top:0px;">
+            </div>
+
         </div>
     </div>
 
@@ -482,8 +501,11 @@
     <div class="section">
         <s2>Performance</s2>
         <hr>
+        <h2 class="grey-heading_nerf">
+            Better performance
+        </h2>
         <p class="paragraph-3 nerf_text">
-            Our method demonstrates excellent performance on two high-precision tasks.
+            We performed exceptionally well on two high-precision tasks.
         </p>
         <div class="w-slide">
             <div class="div-block-9">
@@ -517,6 +539,38 @@
                 </div>
             </div>
         </div><!--  training process -->
+
+        <h2 class="grey-heading_nerf">
+            Comparison of Marker-Based and Image-Based Tactile Representations
+        </h2>
+        <p class="paragraph-3 nerf_text">
+            We designed an ablation study to compare our proposed marker-based tactile representation with the image-based tactile representation. The figure below shows the comparison results of the tactile representations. Although the randomization parameters are the same, the proposed marker-based representation demonstrates advantages over the image-based representation.
+        </p>
+        <div class="columns-5 w-row">
+            <img src="file/albation.png" style="width:95%; margin-right:0px; margin-top:0px;">
+        </div>
+
+        <h2 class="grey-heading_nerf">
+            Effectiveness of Pretraining in Enhancing Early Sim2Real Performance
+        </h2>
+        <p class="paragraph-3 nerf_text">
+            In this experiment, we demonstrate that using the pretrained tactile encoder allows the policy to achieve a considerably high Sim2Real success rate, even at very early training stages. We tested the real-world success rate of the trained weights at different reinforcement learning steps (ranging from 4 to 500K) on the three preset shapes mentioned earlier. The experiments with and without pretraining were repeated three times using different random seeds. At very early steps (i.e., before 10K), the pretrained policies showed a significant advantage over those without pretraining. At 8K steps, the pretrained policies achieved success rates of 77.2%, 64.3%, and 85.4% for the three shapes, respectively, which are comparable to the success rates of non-pretrained policies at 40K steps.
+        </p>
+        <div class="columns-5 w-row">
+            <img src="file/pretrain_result.png" style="width:95%; margin-right:0px; margin-top:0px;">
+        </div>
+
+<!--        <h2 class="grey-heading_nerf">-->
+<!--            Effectiveness of Pretraining in Enhancing Early Sim2Real Performance-->
+<!--        </h2>-->
+<!--        <p class="paragraph-3 nerf_text">-->
+<!--            We designed an ablation study to compare our proposed marker-based tactile representation with the image-based tactile representation. The figure below shows the comparison results of the tactile representations. Although the randomization parameters are the same, the proposed marker-based representation demonstrates advantages over the image-based representation.-->
+<!--        </p>-->
+<!--        <div class="columns-5 w-row">-->
+<!--            <img src="file/albation.png" style="width:95%; margin-right:0px; margin-top:0px;">-->
+<!--        </div>-->
+
+
 
 <!--        <p class="paragraph-3 nerf_text">-->
 <!--            Note that, unlike concurrent works <a href="https://alexyu.net/plenoxels/"> Plenoxels</a>-->
