@@ -468,23 +468,24 @@
                 </div>
             </div>
             <h3>
-                Tactile Feature Extraction and Pretraining
+                Tactile Feature Extraction
             </h3>
             <p class="paragraph-3 nerf_text">
                 In our approach, handling real tactile sensor data is challenging due to marker tracking failures during large deformations, and the high dimensionality of marker displacements affects RL sampling efficiency. To address this, we propose an autoencoder-based tactile feature extractor built on PointNet, pretrained on simulated data to extract low-dimensional, task-agnostic features.
 
                 Tactile Feature Extraction: The network takes both original and displaced marker positions as input. A shared MLP and max-pooling handle the orderless input, producing a 512-dimensional global feature, which is further encoded into a k-dimensional tactile feature. We avoid using position differences to retain spatial information.
 
-                Autoencoder Pretraining: A decoder reconstructs marker positions from the latent features. By minimizing the L2 loss between reconstructed and actual marker positions, we ensure the extracted features capture overall information, independent of marker distribution.
-            </p>
+               </p>
             <div class="columns-5 w-row">
                 <img src="file/network.png" style="width:95%; margin-right:0px; margin-top:0px;">
             </div>
 
             <h3>
-                RL policy network
+                Decoder and pretraining
             </h3>
             <p class="paragraph-3 nerf_text">
+                Autoencoder Pretraining: A decoder reconstructs marker positions from the latent features. By minimizing the L2 loss between reconstructed and actual marker positions, we ensure the extracted features capture overall information, independent of marker distribution.
+
                 In the TD3 algorithm, our actor network maps the observations from the left and right tactile sensors into actions, while the critic network evaluates the Q-values of these actions using privileged ground-truth states from simulation. The feature extractor transforms the displacements of two markers into latent features, which are then processed by the MLP policy network to predict the final actions. Despite variations in tasks, the structures of both the actor and critic networks remain consistent.
                 To enhance sample efficiency and training stability, we pretrain the tactile feature extractor. During RL training, we introduce a brief self-supervised fine-tuning phase to adjust the feature extractor. This fine-tuning continues until the maximum number of updates is reached or the reconstruction loss falls below a preset threshold.
             </p>
